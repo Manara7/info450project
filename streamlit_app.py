@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 st.title("Career Earnings and Work-Life Analysis")
 
@@ -26,8 +27,6 @@ df["EducationGroup"] = pd.Categorical(
     ordered=True
 )
 
-st.sidebar.header("Filters")
-
 selected_group = st.sidebar.selectbox(
     "Select an education group",
     education_order
@@ -35,56 +34,58 @@ selected_group = st.sidebar.selectbox(
 
 filtered_df = df[df["EducationGroup"] == selected_group]
 
-st.subheader("Selected Education Group Summary")
+st.subheader("Average Income for Selected Education Group")
 
 selected_avg = filtered_df["INCWAGE"].mean()
-selected_median = filtered_df["INCWAGE"].median()
-selected_count = filtered_df.shape[0]
 
-col1, col2, col3 = st.columns(3)
-
-col1.metric("Average Income", f"${selected_avg:,.0f}")
-col2.metric("Median Income", f"${selected_median:,.0f}")
-col3.metric("Number of Individuals", f"{selected_count:,}")
+st.metric(
+    label=f"Average Income: {selected_group}",
+    value=f"${selected_avg:,.0f}"
+)
 
 st.subheader("Income Distribution for Selected Education Group")
 
-income_bins = pd.cut(
+fig, ax = plt.subplots(figsize=(10, 5))
+
+ax.hist(
     filtered_df["INCWAGE"],
-    bins=20
+    bins=30,
+    color="steelblue",
+    edgecolor="black"
 )
 
-income_distribution = (
-    income_bins
-    .value_counts()
-    .sort_index()
-    .reset_index()
-)
+ax.set_title(f"Income Distribution for {selected_group}")
+ax.set_xlabel("Annual Income ($)")
+ax.set_ylabel("Number of Individuals")
 
-income_distribution.columns = ["IncomeRange", "NumberOfIndividuals"]
-income_distribution["IncomeRange"] = income_distribution["IncomeRange"].astype(str)
-
-st.bar_chart(
-    income_distribution,
-    x="IncomeRange",
-    y="NumberOfIndividuals"
-)
+st.pyplot(fig)
 
 st.subheader("Average Income by Education Level")
 
-avg_income_df = (
+avg_income = (
     df.groupby("EducationGroup", observed=True)["INCWAGE"]
     .mean()
     .reindex(education_order)
-    .reset_index()
 )
 
-avg_income_df.columns = ["EducationGroup", "AverageIncome"]
+fig2, ax2 = plt.subplots(figsize=(10, 5))
 
-st.bar_chart(
-    avg_income_df,
-    x="EducationGroup",
-    y="AverageIncome"
+ax2.bar(
+    avg_income.index.astype(str),
+    avg_income.values,
+    color="steelblue",
+    edgecolor="black"
 )
 
+ax2.set_title("Average Income by Education Level")
+ax2.set_xlabel("Education Level")
+ax2.set_ylabel("Average Annual Income ($)")
+ax2.tick_params(axis="x", rotation=25)
 
+st.pyplot(fig2)
+
+st.write(
+    "The dashboard shows that average income increases as education level rises. "
+    "Graduate degree graduates have the highest average income, which supports the finding "
+    "that higher education is associated with stronger earning potential."
+)
