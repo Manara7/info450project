@@ -60,10 +60,11 @@ income_distribution["Income Range"] = income_distribution["Income Range"].astype
 st.bar_chart(
     income_distribution,
     x="Income Range",
-    y="Number of Individuals"
+    y="Number of Individuals",
+    color="#2196F3"
 )
 
-st.subheader("Income Trend by Education Level")
+st.subheader("Average Income by Education Level")
 
 avg_income_df = (
     df.groupby("EducationGroup", observed=True)["INCWAGE"]
@@ -74,8 +75,15 @@ avg_income_df = (
 
 avg_income_df.columns = ["Education Group", "Average Income"]
 
-st.line_chart(
+st.bar_chart(
     avg_income_df,
     x="Education Group",
-    y="Average Income"
+    y="Average Income",
+    color="#4CAF50"
+)
+
+st.write(
+    "The dashboard shows that average income increases as education level rises. "
+    "Graduate degree graduates have the highest average income, which supports the finding "
+    "that higher education is associated with stronger earning potential."
 )
