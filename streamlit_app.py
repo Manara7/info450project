@@ -3,16 +3,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 st.title("Career Earnings and Work-Life Analysis")
-st.write("This app explores whether a bachelor's degree is enough to secure a substantial salary.")
+
+st.write(
+    "This app explores whether a bachelor's degree is enough to secure a substantial salary, "
+    "or whether higher income levels are more associated with graduate education."
+)
 
 df = pd.read_csv("streamlit_data.csv")
 
 education_order = [
     "Less than High School",
-    "High School Diploma",
+    "High School",
     "Some College / Associate",
-    "Bachelor's Degree",
-    "Advanced Degree"
+    "Bachelor's",
+    "Graduate Degree"
 ]
 
 df = df[df["EducationGroup"].isin(education_order)]
@@ -43,11 +47,16 @@ st.subheader("Income Distribution for Selected Education Group")
 
 fig, ax = plt.subplots(figsize=(10, 5))
 
-ax.hist(filtered_df["INCWAGE"], bins=30)
+ax.hist(
+    filtered_df["INCWAGE"],
+    bins=30,
+    color="steelblue",
+    edgecolor="black"
+)
 
 ax.set_title(f"Income Distribution for {selected_group}")
 ax.set_xlabel("Annual Income ($)")
-ax.set_ylabel("Number of People")
+ax.set_ylabel("Number of Individuals")
 
 st.pyplot(fig)
 
@@ -61,7 +70,12 @@ avg_income = (
 
 fig2, ax2 = plt.subplots(figsize=(10, 5))
 
-ax2.bar(avg_income.index.astype(str), avg_income.values)
+ax2.bar(
+    avg_income.index.astype(str),
+    avg_income.values,
+    color="steelblue",
+    edgecolor="black"
+)
 
 ax2.set_title("Average Income by Education Level")
 ax2.set_xlabel("Education Level")
@@ -69,3 +83,9 @@ ax2.set_ylabel("Average Annual Income ($)")
 ax2.tick_params(axis="x", rotation=25)
 
 st.pyplot(fig2)
+
+st.write(
+    "The dashboard shows that average income increases as education level rises. "
+    "Graduate degree graduates have the highest average income, which supports the finding "
+    "that higher education is associated with stronger earning potential."
+)
