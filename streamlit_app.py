@@ -133,3 +133,4 @@ if "HighEarner" in df.columns:
 
 st.subheader("Filtered Data Preview")
 st.dataframe(filtered_df.head())
+)
