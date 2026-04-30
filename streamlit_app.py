@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 st.title("Career Earnings and Work-Life Analysis")
 
@@ -34,18 +33,7 @@ selected_group = st.sidebar.selectbox(
     education_order
 )
 
-max_income = st.sidebar.slider(
-    "Maximum income shown",
-    min_value=25000,
-    max_value=200000,
-    value=200000,
-    step=5000
-)
-
-filtered_df = df[
-    (df["EducationGroup"] == selected_group) &
-    (df["INCWAGE"] <= max_income)
-]
+filtered_df = df[df["EducationGroup"] == selected_group]
 
 st.subheader("Selected Education Group Summary")
 
@@ -61,43 +49,42 @@ col3.metric("Number of Individuals", f"{selected_count:,}")
 
 st.subheader("Income Distribution for Selected Education Group")
 
-fig, ax = plt.subplots(figsize=(10, 5))
-
-ax.hist(
+income_bins = pd.cut(
     filtered_df["INCWAGE"],
-    bins=30,
-    color="steelblue",
-    edgecolor="black"
+    bins=20
 )
 
-ax.set_title(f"Income Distribution for {selected_group}")
-ax.set_xlabel("Annual Income ($)")
-ax.set_ylabel("Number of Individuals")
+income_distribution = (
+    income_bins
+    .value_counts()
+    .sort_index()
+    .reset_index()
+)
 
-st.pyplot(fig)
+income_distribution.columns = ["IncomeRange", "NumberOfIndividuals"]
+income_distribution["IncomeRange"] = income_distribution["IncomeRange"].astype(str)
+
+st.bar_chart(
+    income_distribution,
+    x="IncomeRange",
+    y="NumberOfIndividuals"
+)
 
 st.subheader("Average Income by Education Level")
 
-avg_income = (
-    df[df["INCWAGE"] <= max_income]
-    .groupby("EducationGroup", observed=True)["INCWAGE"]
+avg_income_df = (
+    df.groupby("EducationGroup", observed=True)["INCWAGE"]
     .mean()
     .reindex(education_order)
+    .reset_index()
 )
 
-fig2, ax2 = plt.subplots(figsize=(10, 5))
+avg_income_df.columns = ["EducationGroup", "AverageIncome"]
 
-ax2.bar(
-    avg_income.index.astype(str),
-    avg_income.values,
-    color="steelblue",
-    edgecolor="black"
+st.bar_chart(
+    avg_income_df,
+    x="EducationGroup",
+    y="AverageIncome"
 )
 
-ax2.set_title("Average Income by Education Level")
-ax2.set_xlabel("Education Level")
-ax2.set_ylabel("Average Annual Income ($)")
-ax2.tick_params(axis="x", rotation=25)
-
-st.pyplot(fig2)
 
