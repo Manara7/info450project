@@ -10,6 +10,9 @@ st.write(
 
 df = pd.read_csv("streamlit_data.csv")
 
+# 🔥 REMOVE BAD VALUES (this fixes -20000 issue)
+df = df[df["INCWAGE"] > 0]
+
 education_order = [
     "Less than High School",
     "High School",
@@ -45,10 +48,13 @@ col1.metric("Average Income", f"${selected_avg:,.0f}")
 col2.metric("Median Income", f"${selected_median:,.0f}")
 col3.metric("Individuals", f"{selected_count:,}")
 
+# 🔥 CLEAN INCOME RANGE (no weird bins)
 st.subheader("Income Distribution for Selected Education Group")
 
+bins = list(range(0, 200001, 10000))  # 0 → 200k in clean 10k steps
+
 income_distribution = (
-    pd.cut(filtered_df["INCWAGE"], bins=20)
+    pd.cut(filtered_df["INCWAGE"], bins=bins)
     .value_counts()
     .sort_index()
     .reset_index()
@@ -57,13 +63,15 @@ income_distribution = (
 income_distribution.columns = ["Income Range", "Number of Individuals"]
 income_distribution["Income Range"] = income_distribution["Income Range"].astype(str)
 
+# 🔥 BLUE + WHITE BACKGROUND
 st.bar_chart(
     income_distribution,
     x="Income Range",
     y="Number of Individuals",
-    color="#2196F3"
+    color="#1f77b4"
 )
 
+# 🔥 SECOND CHART
 st.subheader("Average Income by Education Level")
 
 avg_income_df = (
@@ -79,11 +87,5 @@ st.bar_chart(
     avg_income_df,
     x="Education Group",
     y="Average Income",
-    color="#4CAF50"
-)
-
-st.write(
-    "The dashboard shows that average income increases as education level rises. "
-    "Graduate degree graduates have the highest average income, which supports the finding "
-    "that higher education is associated with stronger earning potential."
+    color="#1f77b4"
 )
