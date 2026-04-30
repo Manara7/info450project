@@ -85,7 +85,4 @@ ax2.tick_params(axis="x", rotation=25)
 st.pyplot(fig2)
 
 st.write(
-    "The dashboard shows that average income increases as education level rises. "
-    "Graduate degree graduates have the highest average income, which supports the finding "
-    "that higher education is associated with stronger earning potential."
 )
