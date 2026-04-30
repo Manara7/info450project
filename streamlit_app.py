@@ -7,7 +7,6 @@ st.title("Career Earnings and Work-Life Analysis")
 st.write(
     "This app explores whether a bachelor's degree is enough to secure a substantial salary, "
     "or whether higher income levels are more associated with graduate education."
-     st.write ( "Authors : ␣ Manara, ␣ Feaven , ␣ Caitlin ,  ␣ Justing" )
 )
 
 df = pd.read_csv("streamlit_data.csv")
