@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 
 st.title("Career Earnings and Work-Life Analysis")
 
@@ -10,7 +11,7 @@ st.write(
 
 df = pd.read_csv("streamlit_data.csv")
 
-# 🔥 REMOVE BAD VALUES (this fixes -20000 issue)
+# 🔥 REMOVE BAD VALUES
 df = df[df["INCWAGE"] > 0]
 
 education_order = [
@@ -48,10 +49,9 @@ col1.metric("Average Income", f"${selected_avg:,.0f}")
 col2.metric("Median Income", f"${selected_median:,.0f}")
 col3.metric("Individuals", f"{selected_count:,}")
 
-# 🔥 CLEAN INCOME RANGE (no weird bins)
 st.subheader("Income Distribution for Selected Education Group")
 
-bins = list(range(0, 200001, 10000))  # 0 → 200k in clean 10k steps
+bins = list(range(0, 200001, 10000))
 
 income_distribution = (
     pd.cut(filtered_df["INCWAGE"], bins=bins)
@@ -63,15 +63,23 @@ income_distribution = (
 income_distribution.columns = ["Income Range", "Number of Individuals"]
 income_distribution["Income Range"] = income_distribution["Income Range"].astype(str)
 
-# 🔥 BLUE + WHITE BACKGROUND
-st.bar_chart(
-    income_distribution,
-    x="Income Range",
-    y="Number of Individuals",
-    color="#1f77b4"
+hist_chart = (
+    alt.Chart(income_distribution)
+    .mark_bar(color="#1f77b4")
+    .encode(
+        x=alt.X("Income Range:N", sort=None, title="Income Range"),
+        y=alt.Y("Number of Individuals:Q", title="Number of Individuals"),
+        tooltip=["Income Range", "Number of Individuals"]
+    )
+    .properties(
+        width=700,
+        height=400,
+        background="white"
+    )
 )
 
-# 🔥 SECOND CHART
+st.altair_chart(hist_chart, use_container_width=True)
+
 st.subheader("Average Income by Education Level")
 
 avg_income_df = (
@@ -83,9 +91,30 @@ avg_income_df = (
 
 avg_income_df.columns = ["Education Group", "Average Income"]
 
-st.bar_chart(
-    avg_income_df,
-    x="Education Group",
-    y="Average Income",
-    color="#1f77b4"
+bar_chart = (
+    alt.Chart(avg_income_df)
+    .mark_bar(color="#1f77b4")
+    .encode(
+        x=alt.X(
+            "Education Group:N",
+            sort=education_order,
+            title="Education Level",
+            axis=alt.Axis(labelAngle=-25)
+        ),
+        y=alt.Y(
+            "Average Income:Q",
+            title="Average Annual Income ($)"
+        ),
+        tooltip=[
+            "Education Group",
+            alt.Tooltip("Average Income:Q", format="$,.0f")
+        ]
+    )
+    .properties(
+        width=700,
+        height=400,
+        background="white"
+    )
 )
+
+st.altair_chart(bar_chart, use_container_width=True)
