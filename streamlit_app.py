@@ -101,3 +101,4 @@ ax2.tick_params(axis="x", rotation=25)
 
 st.pyplot(fig2)
 )
+)
