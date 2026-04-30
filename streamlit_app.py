@@ -10,8 +10,6 @@ st.write(
 )
 
 df = pd.read_csv("streamlit_data.csv")
-
-# 🔥 REMOVE BAD VALUES
 df = df[df["INCWAGE"] > 0]
 
 education_order = [
@@ -51,31 +49,45 @@ col3.metric("Individuals", f"{selected_count:,}")
 
 st.subheader("Income Distribution for Selected Education Group")
 
-bins = list(range(0, 200001, 10000))
+bins = list(range(0, 200001, 20000))
+labels = [f"${bins[i]//1000}k-${bins[i+1]//1000}k" for i in range(len(bins)-1)]
+
+filtered_df = filtered_df.copy()
+filtered_df["Income Range"] = pd.cut(
+    filtered_df["INCWAGE"],
+    bins=bins,
+    labels=labels,
+    include_lowest=True
+)
 
 income_distribution = (
-    pd.cut(filtered_df["INCWAGE"], bins=bins)
+    filtered_df["Income Range"]
     .value_counts()
     .sort_index()
     .reset_index()
 )
 
 income_distribution.columns = ["Income Range", "Number of Individuals"]
-income_distribution["Income Range"] = income_distribution["Income Range"].astype(str)
 
 hist_chart = (
     alt.Chart(income_distribution)
     .mark_bar(color="#1f77b4")
     .encode(
-        x=alt.X("Income Range:N", sort=None, title="Income Range"),
-        y=alt.Y("Number of Individuals:Q", title="Number of Individuals"),
+        x=alt.X(
+            "Income Range:N",
+            title="Income Range",
+            sort=labels,
+            axis=alt.Axis(labelAngle=-35, labelColor="black", titleColor="black")
+        ),
+        y=alt.Y(
+            "Number of Individuals:Q",
+            title="Number of Individuals",
+            axis=alt.Axis(labelColor="black", titleColor="black", grid=False)
+        ),
         tooltip=["Income Range", "Number of Individuals"]
     )
-    .properties(
-        width=700,
-        height=400,
-        background="white"
-    )
+    .properties(width=700, height=350, background="white")
+    .configure_view(stroke=None)
 )
 
 st.altair_chart(hist_chart, use_container_width=True)
@@ -99,22 +111,26 @@ bar_chart = (
             "Education Group:N",
             sort=education_order,
             title="Education Level",
-            axis=alt.Axis(labelAngle=-25)
+            axis=alt.Axis(labelAngle=-25, labelColor="black", titleColor="black")
         ),
         y=alt.Y(
             "Average Income:Q",
-            title="Average Annual Income ($)"
+            title="Average Annual Income ($)",
+            axis=alt.Axis(labelColor="black", titleColor="black", grid=False)
         ),
         tooltip=[
             "Education Group",
             alt.Tooltip("Average Income:Q", format="$,.0f")
         ]
     )
-    .properties(
-        width=700,
-        height=400,
-        background="white"
-    )
+    .properties(width=700, height=350, background="white")
+    .configure_view(stroke=None)
 )
 
 st.altair_chart(bar_chart, use_container_width=True)
+
+st.write(
+    "The dashboard shows that average income increases as education level rises. "
+    "Graduate degree graduates have the highest average income, supporting the conclusion "
+    "that higher education is associated with stronger earning potential."
+)
